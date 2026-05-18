@@ -1,0 +1,9 @@
+# Ignore all files and folders at the root level
+/*
+
+# Allow tracking of the Final folder
+!/Final/
+
+# Allow tracking of standard repository files
+!/README.md
+!/.gitignore
