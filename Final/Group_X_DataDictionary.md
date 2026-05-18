@@ -1,41 +1,19 @@
 # Phase 1: Business Problem & Dataset Selection
-**Group ID:** Group X  
 **Course Project:** Business Analytics Final Project  
 **Folder:** `Final/`  
 
 ---
 
-## 🏬 1. Business Domain & Context
+## 1. Business Domain & Context
 
 ### The Domain: E-Commerce Marketplace (Olist)
 This project focuses on the **Brazilian E-Commerce Marketplace** domain, analyzing real-world transactional data provided by **Olist**, the largest department store marketplace in Brazilian e-commerce. Olist operates as an integrator platform: it connects small, independent local businesses across Brazil with major e-commerce retail channels (such as Submarino, Americanas, and Mercado Livre) through a single dashboard. 
 
-Once a customer places an order on a host retailer platform, Olist coordinates the transaction. The seller is notified to package and ship the item, while Olist manages the customer service, reviews, payment collections, and overall logistics tracking.
-
-```
-  +--------------+          +---------------+          +------------------+
-  | Local Seller | -------> | Olist Platform| -------> | Retail Channels  |
-  | (Small Shop) | <------- |  (Integrator) | <------- | (e.g. Submarino) |
-  +--------------+          +---------------+          +------------------+
-         |                                                      ^
-         v                                                      |
-  +--------------+              Ships Item              +------------------+
-  |   Logistics  | -----------------------------------> |  Final Customer  |
-  +--------------+                                      +------------------+
-```
-
-### The Business Context & Challenges
-Operating a nationwide marketplace in a massive, geographically diverse country like Brazil introduces several complex, interconnected business challenges that our analytics must address:
-1. **Logistics & Delivery Inefficiencies:** Brazil's vast size and varying regional infrastructure lead to significant transport delays. Coordinating shipping times between thousands of decentralized sellers and customers is a major logistical bottleneck.
-2. **Customer Satisfaction (Review Scores):** E-commerce success is heavily driven by customer trust. Delays in carrier pick-ups or final deliveries directly harm review scores, which in turn reduces repeat purchases.
-3. **Regional Imbalances:** Economic activity in Brazil is heavily concentrated in the Southeast region (e.g., São Paulo, Rio de Janeiro). Understanding this concentration is crucial for optimizing seller acquisition and local warehouse hubs.
-4. **Credit & Payment Dynamics:** Brazil has a unique retail payment culture. Customers rely heavily on credit installments (paying off small purchases over 3 to 12 months) and alternative cash methods like *boleto bancário* (bank slips). Optimizing payment gateways and installment offers is critical for customer conversion.
-
 ---
 
-## 📊 2. Chosen Dataset Specifications
+## 2. Chosen Dataset Specifications
 
-Our analysis utilizes the official **Brazilian E-Commerce Public Dataset by Olist** (sourced from Kaggle). To facilitate a comprehensive analysis, the original 9 relational tables were cleaned, aggregated, and joined into a single consolidated, granular item-level dataset:
+Our analysis utilizes the official **Brazilian E-Commerce Public Dataset by Olist** (sourced from Kaggle). The original 9 relational tables were cleaned, aggregated, and joined into a single consolidated, granular item-level dataset:
 
 * **Dataset Filename:** `olist_granular_dataset.csv`
 * **Format:** Comma-Separated Values (`.csv`) / Excel (`.xlsx`)
@@ -45,7 +23,7 @@ Our analysis utilizes the official **Brazilian E-Commerce Public Dataset by Olis
 
 ---
 
-## 📖 3. Meticulous Data Dictionary
+## 3. Data Dictionary
 
 The following table serves as our official Data Dictionary, defining each of the 32 columns in our consolidated analytical dataset:
 
@@ -86,47 +64,47 @@ The following table serves as our official Data Dictionary, defining each of the
 
 ---
 
-## 🎯 4. Business Questions (DeepSeek Adopted Questions)
+## 4. Business Questions (DeepSeek Adopted Questions)
 
-Here are the 7 direct, e-commerce focused business questions you selected for our project:
+Here are the 7 e-commerce focused business questions:
 
-### 📊 Q1 — Descriptive Statistics
+### Q1 — Descriptive Statistics
 * **Question:** What do typical prices, freight costs, product weights, and review scores look like across Olist's product categories? Which categories are cheap (commoditized) vs. expensive (premium)?
 * **Why this matters:** A seller deciding what to sell needs to know if a category has room for a high-priced product or if it's a race to the bottom. Olist can decide where to recruit more sellers.
 * **Decision:** "Which categories should I list my products in?" / "Does category X support a premium price?"
 * **Visualization:** Histogram or KDE plot
 
-### 📈 Q2 — Trend Analysis
+### Q2 — Trend Analysis
 * **Question:** Which months of the year have the highest and lowest sales? Do spikes happen around predictable events like Black Friday or Christmas, and which product categories drive them?
 * **Why this matters:** Sellers need to know when to stock inventory and run ads. If electronics peak in November and furniture in December, a seller should plan their marketing calendar and cash flow accordingly.
 * **Decision:** "When should I launch promotions?" / "How much inventory should I order for each season?"
 * **Visualization:** Line chart (time series)
 
-### 💳 Q3 — Cross-Tabulation Analysis
+### Q3 — Cross-Tabulation Analysis
 * **Question:** Do customers pay differently depending on what they're buying? For example, do people use credit card installments for electronics but boleto (bank slip) for home goods?
 * **Why this matters:** If 80% of electronics buyers use 6-installment credit cards, removing that option kills sales. If budget categories lean toward boleto, offering a boleto discount could capture more customers.
 * **Decision:** "Which product categories need installment payment options?" / "Should I offer boleto discounts on specific items?"
 * **Visualization:** Heatmap (crosstab)
 
-### 🗺️ Q4 — Drill-Down Analysis
+### Q4 — Drill-Down Analysis
 * **Question:** Which states and cities have the worst delivery delays? And are those problem areas big revenue markets or small ones?
 * **Why this matters:** Olist has to decide where to invest in logistics. Fixing a city that represents 1% of revenue but has 50% of delays is a waste. Fixing a city with high revenue AND long delays is urgent.
 * **Decision:** "Which 3 cities should I fix carrier contracts for first?" / "Where should Olist build its next fulfillment center?"
 * **Visualization:** Hierarchical bar or treemap
 
-### 🔮 Q5 — Correlation & Predictive Analysis
+### Q5 — Correlation & Predictive Analysis
 * **Question:** What actually makes customers give better reviews — lower prices, faster shipping, or better product photos? If a seller has 100 BRL to spend on improving their ratings, where should they put it?
 * **Why this matters:** Sellers have limited money. They can cut prices, subsidize shipping, or improve their product pages. A regression model tells them which move has the biggest impact on satisfaction for the same cost.
 * **Decision:** "Should I cut my price by 10 BRL or offer free shipping?" / "Is it worth hiring a photographer for better product photos?"
 * **Visualization:** Scatter plot with regression line
 
-### 🚨 Q6 — Ad Hoc (Follow-up from Q5)
+### Q6 — Ad Hoc (Follow-up from Q5)
 * **Question:** Are there product categories where customers happily pay high prices AND give 5-star reviews? What do those categories have in common?
 * **Why this matters:** If some categories support premium pricing without hurting satisfaction, Olist can target those for seller recruitment and premium positioning.
 * **Decision:** "Which categories should I launch a premium product line in?"
 * **Visualization:** Interactive Bubble Scatter Plot (Average Price vs. % 5-Star Reviews)
 
-### 🚛 Q7 — Ad Hoc (Follow-up from Q4)
+### Q7 — Ad Hoc (Follow-up from Q4)
 * **Question:** Are the regions with the longest delivery delays also paying the highest shipping costs? In other words, are some customers getting a raw deal — paying more and waiting longer?
 * **Why this matters:** If remote customers pay premium shipping and still get bad service, they'll stop buying. Olist needs to know whether to subsidize those routes or renegotiate carrier contracts.
 * **Decision:** "Should we subsidize shipping to certain states?" / "Which carrier routes need renegotiation?"
