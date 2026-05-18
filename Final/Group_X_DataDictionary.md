@@ -124,10 +124,10 @@ Here are the 7 direct, e-commerce focused business questions you selected for ou
 * **Question:** Are there product categories where customers happily pay high prices AND give 5-star reviews? What do those categories have in common?
 * **Why this matters:** If some categories support premium pricing without hurting satisfaction, Olist can target those for seller recruitment and premium positioning.
 * **Decision:** "Which categories should I launch a premium product line in?"
-* **Visualization:** Any chart appropriate to the finding
+* **Visualization:** Interactive Bubble Scatter Plot (Average Price vs. % 5-Star Reviews)
 
 ### 🚛 Q7 — Ad Hoc (Follow-up from Q4)
 * **Question:** Are the regions with the longest delivery delays also paying the highest shipping costs? In other words, are some customers getting a raw deal — paying more and waiting longer?
 * **Why this matters:** If remote customers pay premium shipping and still get bad service, they'll stop buying. Olist needs to know whether to subsidize those routes or renegotiate carrier contracts.
 * **Decision:** "Should we subsidize shipping to certain states?" / "Which carrier routes need renegotiation?"
-* **Visualization:** Any chart appropriate to the finding
+* **Visualization:** Interactive Bubble Scatter Plot (Average Shipping Fee vs. Average Delay by State)
