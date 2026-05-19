@@ -1,6 +1,5 @@
 # Phase 1: Business Problem & Dataset Selection
-**Course Project:** Business Analytics Final Project  
-**Folder:** `Final/`  
+**Course Project:** Business Analytics Final Project   
 
 ---
 

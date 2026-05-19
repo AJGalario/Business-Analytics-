@@ -168,6 +168,25 @@ app.layout = html.Div([
                         style={'fontSize': '15px', 'color': text_main, 'margin': '15px 0 10px 0', 'letterSpacing': '1px', 'fontWeight': 'bold', 'textAlign': 'center'}),
                 html.Div(id='table-operational-red-zone', style={'padding': '0 20px 20px 20px', 'overflowX': 'auto'})
             ], style={'flex': '1', 'margin': '10px', 'backgroundColor': bg_card, 'border': f'1px solid {border_card}', 'borderRadius': '12px'})
+        ], style={'display': 'flex', 'flexWrap': 'wrap', 'width': '100%'}),
+
+        # Row 5: Review Prediction Widget
+        html.Div([
+            html.Div([
+                html.H3("📦 PREDICT REVIEW FROM SHIPPING TIME", 
+                        style={'fontSize': '15px', 'color': text_main, 'margin': '15px 0 10px 0', 'letterSpacing': '1px', 'fontWeight': 'bold', 'textAlign': 'center'}),
+                html.Div([
+                    html.Label("Transit Time (Days):", style={'color': text_sec, 'marginBottom': '8px', 'display': 'block', 'fontWeight': 'bold'}),
+                    dcc.Slider(
+                        id='transit-slider',
+                        min=1, max=30, step=1, value=10,
+                        marks={i: f'{i}d' for i in range(1, 31, 5)},
+                        tooltip={"placement": "bottom", "always_visible": True}
+                    ),
+                ], style={'padding': '10px 20px 5px 20px'}),
+                html.Div(id='prediction-display', style={'textAlign': 'center', 'padding': '10px 15px 5px 15px'}),
+                html.Div(id='model-stats', style={'textAlign': 'center', 'padding': '0 15px 15px 15px', 'color': text_sec, 'fontSize': '12px'})
+            ], style={'flex': '1', 'margin': '10px', 'backgroundColor': bg_card, 'border': f'1px solid {border_card}', 'borderRadius': '12px'})
         ], style={'display': 'flex', 'flexWrap': 'wrap', 'width': '100%'})
     ], style={'padding': '0 10px'})
 
@@ -295,7 +314,13 @@ def update_delay_treemap(selected_categories, selected_states):
         title='Q4 — Delivery Delay Drill-Down: State → City<br><sup>Box size = order volume, Color = avg delay (days)</sup>',
         hover_data={'revenue': ':,.0f', 'orders': ':,'}
     )
-    fig.update_traces(textinfo='label+value')
+    fig.update_traces(
+        textinfo='label+value',
+        hovertemplate='<b>%{label}</b> / %{parent}<br>'
+                      'Avg Delay: %{color:.1f} days<br>'
+                      'Revenue: R$ %{customdata[0]:,.0f}<br>'
+                      'Orders: %{customdata[1]:,}<extra></extra>'
+    )
     fig.update_layout(
         paper_bgcolor=bg_card,
         margin=dict(l=10, r=10, t=50, b=10),
@@ -363,6 +388,62 @@ def update_regression_chart(selected_categories, selected_states):
         fig.add_annotation(text=f"Live Regression execution error: {str(e)}", showarrow=False, font=dict(color=text_sec, size=14))
         fig.update_layout(plot_bgcolor=bg_card, paper_bgcolor=bg_card)
         return fig
+
+
+@app.callback(
+    [Output('prediction-display', 'children'),
+     Output('model-stats', 'children')],
+    [Input('category-filter', 'value'),
+     Input('state-filter', 'value'),
+     Input('transit-slider', 'value')]
+)
+def update_prediction(selected_categories, selected_states, transit_days):
+    data = get_filtered_dataset(selected_categories, selected_states)
+
+    reg_df = data[data['review_score'].notnull() & data['Transit Time Days'].notnull()].copy()
+
+    if len(reg_df) < 15:
+        empty_pred = html.Div("⚠️ Insufficient data (min 15 records required)", style={'color': '#f87171', 'fontSize': '14px'})
+        return empty_pred, html.Div()
+
+    try:
+        X = reg_df[['Transit Time Days']]
+        y = reg_df['review_score']
+
+        model = LinearRegression()
+        model.fit(X, y)
+
+        predicted = model.predict([[transit_days]])[0]
+        predicted = np.clip(predicted, 1, 5)
+        r2 = model.score(X, y)
+        coef = model.coef_[0]
+        intercept = model.intercept_
+
+        stars_count = max(1, round(predicted))
+        stars = '⭐' * stars_count
+
+        pred_html = html.Div([
+            html.Div(stars, style={'fontSize': '28px', 'margin': '5px 0'}),
+            html.Div(f'Predicted: {predicted:.2f} / 5.0', 
+                     style={'fontSize': '22px', 'fontWeight': 'bold', 'color': accent_color, 'margin': '8px 0'}),
+            html.Div(f'for {transit_days} day{"s" if transit_days != 1 else ""} transit',
+                     style={'fontSize': '14px', 'color': text_sec}),
+        ])
+
+        stats_html = html.Div([
+            html.Hr(style={'borderColor': border_card, 'margin': '10px 0'}),
+            html.Div(f'Review = {intercept:.3f} {"+" if coef >= 0 else ""} ({coef:.4f} × Transit Days)',
+                     style={'margin': '4px 0'}),
+            html.Div(f'R² = {r2:.3f} | Each shipping day {"raises" if coef >= 0 else "lowers"} review by {abs(coef):.4f} pts',
+                     style={'margin': '4px 0'}),
+            html.Div(f'Trained on {len(reg_df):,} orders', style={'margin': '4px 0', 'fontSize': '11px'}),
+        ])
+
+        return pred_html, stats_html
+
+    except Exception as e:
+        error_pred = html.Div(f"⚠️ Model error: {str(e)}", style={'color': '#f87171', 'fontSize': '14px'})
+        return error_pred, html.Div()
 
 
 @app.callback(
@@ -479,13 +560,19 @@ def update_sweet_spot_scatter(selected_categories, selected_states):
         y='pct_5_star',
         size='volume',
         color='pct_5_star',
-        color_continuous_scale='RdYlGn',  # Green = high satisfaction
+        color_continuous_scale='RdYlGn',
         title='Q6 — Sweet Spot Analysis: High Price + High Satisfaction Categories<br><sup>Bubble size = order volume, Color = % 5-star reviews</sup>',
         labels={'avg_price': 'Average Item Price (BRL)', 'pct_5_star': '% 5-Star Reviews', 'Product Category': 'Category'},
         hover_data={'Product Category': True, 'avg_price': ':,.2f', 'pct_5_star': ':.2f', 'volume': ':,'}
     )
 
-    fig.update_traces(marker=dict(sizemin=5))
+    fig.update_traces(
+        marker=dict(sizemin=5),
+        hovertemplate='<b>%{customdata[0]}</b><br>'
+                      'Avg Price: R$ %{x:,.2f}<br>'
+                      '5-Star Reviews: %{y:.2f}%%<br>'
+                      'Volume: %{marker.size:,}<extra></extra>'
+    )
 
     # Dark theme layout adjustments
     fig.update_layout(
@@ -549,14 +636,21 @@ def update_raw_deal_scatter(selected_categories, selected_states):
         y='avg_delay',
         size='orders',
         color='avg_delay',
-        color_continuous_scale='RdYlBu_r',  # Red = severe delays (positive), Blue = early deliveries (negative)
+        color_continuous_scale='RdYlBu_r',
         text='customer_state',
         title='Q7 — Ad Hoc: Geographic Shipping Fee vs. Average Delay by State<br><sup>Bubble size = order volume, Color = average delay (days)</sup>',
         labels={'avg_freight': 'Average Freight Cost (BRL)', 'avg_delay': 'Average Delivery Delay (Days)', 'customer_state': 'State'},
         hover_data={'avg_freight': ':,.2f', 'avg_delay': ':.2f', 'orders': ':,'}
     )
 
-    fig.update_traces(textposition='top center', marker=dict(sizemin=5))
+    fig.update_traces(
+        textposition='top center',
+        marker=dict(sizemin=5),
+        hovertemplate='<b>%{text}</b><br>'
+                      'Avg Freight: R$ %{x:,.2f}<br>'
+                      'Avg Delay: %{y:.1f} days<br>'
+                      'Orders: %{marker.size:,}<extra></extra>'
+    )
     fig.update_layout(
         paper_bgcolor=bg_card,
         plot_bgcolor=bg_card,
